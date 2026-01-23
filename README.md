@@ -1,30 +1,27 @@
-\# WordLister
-
-
+# WordLister
 
 WordLister is a Python CLI tool for generating custom wordlists from text or files.
 
+## Features
 
+- Generate wordlists from text or input files
 
-\## Features
+- Uppercase, lowercase, and mixed modes (Mixed mode generates uppercase, lowercase, and words with mixed capitalization.)
 
+- Custom word limit
 
+- Uses low RAM
 
-\- Generate wordlists from text or input files
+- Output to `.txt` file
 
-\- Uppercase, lowercase, and mixed modes (Mixed mode generates uppercase, lowercase, and words with mixed capitalization.)
+## Clone
 
-\- Custom word limit
+```bash
+git clone https://github.com/arch-Fddr3/WordLister.git
 
-\- Uses low RAM
+```
 
-\- Output to `.txt` file
-
-
-
-\## Usage
-
-
+## Usage
 
 ```bash
 python3 wordlister.py -i "Lucas 1990 ! @ #" -n 10000 -m -o output.txt
