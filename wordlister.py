@@ -15,7 +15,7 @@ class SpacedHelpFormatter( argparse.HelpFormatter ):
         return text + "\n\n"
 
 def banner():
-    print( r"""
+    print( """
                                           ,,                ,,                                 
 `7MMF'     A     `7MF'                  `7MM  `7MMF'        db            mm                   
   `MA     ,MA     ,V                      MM    MM                        MM                   
