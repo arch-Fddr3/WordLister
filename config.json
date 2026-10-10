@@ -1,3 +1,4 @@
 {
-    "eta_config": "True"
+    "eta_config": true,
+    "update_time": 1.0
 }
