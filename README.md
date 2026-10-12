@@ -8,7 +8,7 @@ WordLister is a lightweight Python CLI tool for generating custom wordlists from
 
 ## Features
 
-- Generate wordlists from text 
+- Generate wordlists from text or input files
 
 - Uppercase, lowercase, and mixed modes (Mixed mode generates uppercase, lowercase, and words with mixed capitalization.)
 
