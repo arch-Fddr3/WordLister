@@ -80,7 +80,7 @@ def words_loader( input_value ):
     
     if os.path.isfile( input_value ):
         with open( input_value, "r", encoding = "utf-8", errors = "ignore" ) as f:
-            words = [ line.strip() for line in f if line.strip() ]
+            words = f.read().split()
     else:
         words = input_value.split()
     
