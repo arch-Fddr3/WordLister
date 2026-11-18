@@ -10,13 +10,14 @@ from itertools import product
 update_time = 1.0
 eta = 0
 eta_config = True
-output_file_size = "over 300 GB"
+size_warning = True
 
 
 class SpacedHelpFormatter( argparse.HelpFormatter ):
     def _format_action( self, action ):
         text = super()._format_action( action )
         return text + "\n\n"
+
 
 def banner():
     print( r'''
@@ -39,48 +40,64 @@ def banner():
     
     
     
-    v2.0.0
+    v2.1.0
     
     
     
     ''' )
 
+
 def output_size( args ):
-  	global output_file_size
-  	input_words = args.input.encode( "utf-8" )
-    input_bytes = len( input_words )
-    if input_bytes <= 17.5:
-      	if args.number <= 10000000:
-      			output_file_size = "less or around 300 MB"
-        elif args.number <= 500000000:
-          	output_file_size = "between 5 and 7 GB"
-        elif args.number <= 1000000000:
-          	output_file_size = "between 10 and 14 GB"
-        elif args.number <= 5000000000:
-          	output_file_size = "between 50 and 75 GB"
-        elif args.number <= 10000000000:
-          	output_file_size = "between 100 and 150 GB"
-        else:
-          	pass
-		elif input_bytes >= 17.5:
-      	if args.number <= 10000000:
-      			output_file_size = "less or around 300 MB"
-        elif args.number <= 500000000:
-          	output_file_size = "between 10 and 14 GB"
-        elif args.number <= 1000000000:
-          	output_file_size = "between 20 and 30 GB"
-        elif args.number <= 5000000000:
-          	output_file_size = "between 100 and 150 GB"
-        elif args.number <= 10000000000:
-          	output_file_size = "between 200 and 300 GB"
-        else:
-          	pass
-    print( f"""the output file size will be { output_file_size } do you wish to continue? [y/n]""" )
-    auth = input().strip().lower()
-    if auth == "y":
-      	pass
-  	else:
-    		sys.exit()
+    output_file_size = "over 300 GB"
+    input_words = args.input.encode("utf-8")
+    input_bytes = len(input_words)
+    
+    if size_warning:
+    		if input_bytes <= 17.5:
+        		if args.number <= 10000000:
+            		output_file_size = "less or around 300 MB"
+        		elif args.number <= 500000000:
+            		output_file_size = "between 5 and 7 GB"
+        		elif args.number <= 1000000000:
+            		output_file_size = "between 10 and 14 GB"
+        		elif args.number <= 5000000000:
+            		output_file_size = "between 50 and 75 GB"
+        		elif args.number <= 10000000000:
+            		output_file_size = "between 100 and 150 GB"
+        		else:
+            		pass
+    		else:
+        		if args.number <= 10000000:
+            		output_file_size = "less or around 300 MB"
+        		elif args.number <= 500000000:
+            		output_file_size = "between 10 and 14 GB"
+        		elif args.number <= 1000000000:
+            		output_file_size = "between 20 and 30 GB"
+        		elif args.number <= 5000000000:
+            		output_file_size = "between 100 and 150 GB"
+        		elif args.number <= 10000000000:
+            		output_file_size = "between 200 and 300 GB"
+        		else:
+            		pass
+            
+    		print( f"The output file size will be {output_file_size}. Do you wish to continue? [y/n]" )
+    		print()
+    
+    		auth = input().strip().lower()
+    		while True:
+    				if auth == "y":
+        				break
+    				elif auth == "n":
+        				sys.exit()
+    				else:
+      					print()
+        				print( "input is not valid enter exclusively [y/n]" )
+                print()
+            		auth = input().strip().lower()
+    		pass
+		else:
+    		pass
+        
         
 def config_loader():
     global eta_config
@@ -88,6 +105,7 @@ def config_loader():
     default_data = {
                 "eta_config": True,
                 "update_time": 1.0 
+                "size_warning": True
     }
     
     if os.path.exists( "config.json" ):
@@ -108,6 +126,7 @@ def config_save():
     
     config[ "eta_config" ] = eta_config
     config[ "update_time" ] = update_time
+    config[ "size_warning" ] = size_warning
     
     with open( "config.json", "w", encoding = "utf-8" ) as s:
         json.dump( config, s, indent = 4 )
@@ -184,6 +203,10 @@ if __name__ == "__main__":
         default = 1.0, help = "select how much time pass between ETA updates"
     )
     extra_options_group.add_argument(
+        "--size-warning", type = "store_false",
+        default = True, help = "enable or disable size warning authorisation"
+    )
+    extra_options_group.add_argument(
         "--save-config", action = "store_true",
         default = False, help = "save as active configuration"
     )
@@ -208,7 +231,13 @@ if __name__ == "__main__":
     if eta_config and "--eta-update" in sys.argv:
         if args.eta_update != update_time:
             update_time = args.eta_update
-    
+
+    if "--size-warning" in sys.argv:
+      	if size_warning:
+          	size_warning = False 
+        elif not size_warning:
+        		size_warning = True
+ 
     if args.save_config:
         config_save()
    
