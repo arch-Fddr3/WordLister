@@ -1,4 +1,5 @@
 {
     "eta_config": true,
-    "update_time": 1.0
+    "update_time": 1.0,
+    "size_warning": true
 }
