@@ -10,6 +10,7 @@ from itertools import product
 update_time = 1.0
 eta = 0
 eta_config = True
+output_file_size = "over 300 GB"
 
 
 class SpacedHelpFormatter( argparse.HelpFormatter ):
@@ -44,6 +45,43 @@ def banner():
     
     ''' )
 
+def output_size( args ):
+  	global output_file_size
+  	input_words = args.input.encode( "utf-8" )
+    input_bytes = len( input_words )
+    if input_bytes <= 17.5:
+      	if args.number <= 10000000:
+      			output_file_size = "less or around 300 MB"
+        elif args.number <= 500000000:
+          	output_file_size = "between 5 and 7 GB"
+        elif args.number <= 1000000000:
+          	output_file_size = "between 10 and 14 GB"
+        elif args.number <= 5000000000:
+          	output_file_size = "between 50 and 75 GB"
+        elif args.number <= 10000000000:
+          	output_file_size = "between 100 and 150 GB"
+        else:
+          	pass
+		elif input_bytes >= 17.5:
+      	if args.number <= 10000000:
+      			output_file_size = "less or around 300 MB"
+        elif args.number <= 500000000:
+          	output_file_size = "between 10 and 14 GB"
+        elif args.number <= 1000000000:
+          	output_file_size = "between 20 and 30 GB"
+        elif args.number <= 5000000000:
+          	output_file_size = "between 100 and 150 GB"
+        elif args.number <= 10000000000:
+          	output_file_size = "between 200 and 300 GB"
+        else:
+          	pass
+    print( f"""the output file size will be { output_file_size } do you wish to continue? [y/n]""" )
+    auth = input().strip().lower()
+    if auth == "y":
+      	pass
+  	else:
+    		sys.exit()
+        
 def config_loader():
     global eta_config
     global update_time
@@ -96,7 +134,7 @@ def generator( words ):
         length += 1
     
 if __name__ == "__main__":
-    parser=argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(
         prog = "WordLister",
         description = "A program to create any wordlist from a range of letter to .txt",
         epilog = r"""Example: python3 wordlister.py -i "Lucas 1990 ! @ #" -n 10000 -o Lucas.txt -v -m""",
@@ -157,6 +195,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     banner()
+    
+    output_size( args )
     
     config_loader()
     
