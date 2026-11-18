@@ -48,63 +48,64 @@ def banner():
 
 
 def output_size( args ):
-    output_file_size = "over 300 GB"
-    input_words = args.input.encode("utf-8")
-    input_bytes = len(input_words)
+    global size_warning
+    output_file_size = "over 500 GB"
+    input_words = args.input.encode( "utf-8" )
+    input_bytes = len( input_words )
+
+    if size_warning == True:
+        if input_bytes <= 17.5:
+            if args.number <= 10000000:
+                output_file_size = "can reach up to 500 MB"
+            elif args.number <= 500000000:
+                output_file_size = "can reach up to 25 GB"
+            elif args.number <= 1000000000:
+                output_file_size = "can reach up to 50 GB"
+            elif args.number <= 5000000000:
+                output_file_size = "can reach up to 250 GB"
+            elif args.number <= 10000000000:
+                output_file_size = "can reach up to 500 GB"
+            else:
+                pass
+        else:
+            if args.number <= 10000000:
+                output_file_size = "can reach up to 1 GB"
+            elif args.number <= 500000000:
+                output_file_size = "can reach up to 50 GB"
+            elif args.number <= 1000000000:
+                output_file_size = "can reach up to 100 GB"
+            elif args.number <= 5000000000:
+                output_file_size = "can reach up to 500 GB"
+            elif args.number <= 10000000000:
+                output_file_size = "can reach up to 1 TB"
+            else:
+                pass 
+        print( f"The output file size { output_file_size }. Do you wish to continue? [y/n]" )
+        print()
+        auth = input().strip().lower()
+        print()
     
-    if size_warning:
-    		if input_bytes <= 17.5:
-        		if args.number <= 10000000:
-            		output_file_size = "less or around 300 MB"
-        		elif args.number <= 500000000:
-            		output_file_size = "between 5 and 7 GB"
-        		elif args.number <= 1000000000:
-            		output_file_size = "between 10 and 14 GB"
-        		elif args.number <= 5000000000:
-            		output_file_size = "between 50 and 75 GB"
-        		elif args.number <= 10000000000:
-            		output_file_size = "between 100 and 150 GB"
-        		else:
-            		pass
-    		else:
-        		if args.number <= 10000000:
-            		output_file_size = "less or around 300 MB"
-        		elif args.number <= 500000000:
-            		output_file_size = "between 10 and 14 GB"
-        		elif args.number <= 1000000000:
-            		output_file_size = "between 20 and 30 GB"
-        		elif args.number <= 5000000000:
-            		output_file_size = "between 100 and 150 GB"
-        		elif args.number <= 10000000000:
-            		output_file_size = "between 200 and 300 GB"
-        		else:
-            		pass
-            
-    		print( f"The output file size will be {output_file_size}. Do you wish to continue? [y/n]" )
-    		print()
-    
-    		auth = input().strip().lower()
-    		while True:
-    				if auth == "y":
-        				break
-    				elif auth == "n":
-        				sys.exit()
-    				else:
-      					print()
-        				print( "input is not valid enter exclusively [y/n]" )
+        while True:
+            if auth == "y":
+                break
+            elif auth == "n":
+                sys.exit()
+            else:
                 print()
-            		auth = input().strip().lower()
-    		pass
-		else:
-    		pass
-        
-        
+                print( "Input is not valid enter exclusively [y/n]" )
+                print()
+                auth = input().strip().lower()
+                print()
+        pass
+  
+  
 def config_loader():
     global eta_config
     global update_time
+    global size_warning
     default_data = {
                 "eta_config": True,
-                "update_time": 1.0 
+                "update_time": 1.0, 
                 "size_warning": True
     }
     
@@ -113,6 +114,7 @@ def config_loader():
             config = json.load( c )
             eta_config = config[ "eta_config" ]
             update_time = config[ "update_time" ]
+            size_warning = config[ "size_warning" ]
     else:
         with open( "config.json", "x", encoding = "utf-8" ) as c:
             json.dump( default_data, c, indent = 4 )
@@ -147,8 +149,8 @@ def generator( words ):
     length = 1
     
     while True:
-        for combo in product( words, repeat=length ):
-            word = "".join(combo)
+        for combo in product( words, repeat = length ):
+            word = "".join( combo )
             yield word
         length += 1
     
@@ -156,7 +158,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog = "WordLister",
         description = "A program to create any wordlist from a range of letter to .txt",
-        epilog = r"""Example: python3 wordlister.py -i "Lucas 1990 ! @ #" -n 10000 -o Lucas.txt -v -m""",
+        epilog = r"""Example: python3 wordlister.py -i "Lucas 1990 ! @ #" -n 10000 -o Lucas.txt -m""",
         formatter_class = SpacedHelpFormatter
     ) 
     parser.add_argument(
@@ -202,9 +204,14 @@ if __name__ == "__main__":
         "--eta-update", type = float,
         default = 1.0, help = "select how much time pass between ETA updates"
     )
-    extra_options_group.add_argument(
-        "--size-warning", type = "store_false",
-        default = True, help = "enable or disable size warning authorisation"
+    size_group = extra_options_group.add_mutually_exclusive_group()
+    size_group.add_argument(
+        "--size-warning", action = "store_true",
+        default = True, help = "enable size warning authorisation"
+    )
+    size_group.add_argument(
+        "--no-size-warning", action = "store_false",
+        default = True, help = "disable size warning authorisation"
     )
     extra_options_group.add_argument(
         "--save-config", action = "store_true",
@@ -213,16 +220,14 @@ if __name__ == "__main__":
     if len( sys.argv ) == 1:
         banner()
         parser.print_help()
-        sys.exit(0)
+        sys.exit()
     
     args = parser.parse_args()
     
     banner()
     
-    output_size( args )
-    
     config_loader()
-    
+
     if "--eta" in sys.argv:
         eta_config = True
     elif "--no-eta" in sys.argv:
@@ -233,14 +238,15 @@ if __name__ == "__main__":
             update_time = args.eta_update
 
     if "--size-warning" in sys.argv:
-      	if size_warning:
-          	size_warning = False 
-        elif not size_warning:
-        		size_warning = True
- 
+        size_warning = True
+    elif "--no-size-warning" in sys.argv:
+        size_warning = False
+    
     if args.save_config:
         config_save()
-   
+
+    output_size( args )
+
     words = words_loader( args.input )
     words_count = 0
     start_time = time.time()
@@ -249,11 +255,11 @@ if __name__ == "__main__":
     current_time = start_time
     
     if args.lowercase:
-        words = list(set([w.lower() for w in words]))
+        words = list( set([ w.lower() for w in words ]))
     elif args.uppercase:
-        words = list(set([w.upper() for w in words]))
+        words = list( set([ w.upper() for w in words ]))
     else:
-        words = list(set(words))
+        words = list( set( words ))
     
     with open( args.output, "w" ) as f:
         for word in generator( words ):
@@ -268,11 +274,11 @@ if __name__ == "__main__":
                         speed = words_count / ( current_time - start_time )
                         eta = ( args.number - words_count ) / speed
                         last_update_time = current_time
-                        print( f"\rWords: {words_count}/{args.number} | ETA: {int(eta)}s  ", end="", flush=True )
+                        print( f"\rWords: { words_count }/{ args.number } | ETA: { int( eta )}s  ", end = "", flush = True )
             elif args.mixed:
-                options = [(c.lower(), c.upper()) if c.isalpha() else (c,) for c in word]
-                for w in product(*options):
-                    w_u = "".join(w)
+                options = [( c.lower(), c.upper()) if c.isalpha() else ( c, ) for c in word ]
+                for w in product( * options ):
+                    w_u = "".join( w )
                     if words_count >= args.number:
                             break
                     f.write( w_u + "\n" )
@@ -285,7 +291,7 @@ if __name__ == "__main__":
                             speed = words_count / ( current_time - start_time )
                             eta = ( args.number - words_count ) / speed
                             last_update_time = current_time
-                            print( f"\rWords: {words_count}/{args.number} | ETA: {int(eta)}s  ", end="", flush=True )
+                            print( f"\rWords: { words_count }/{ args.number } | ETA: { int( eta )}s  ", end = "", flush = True )
             if words_count >= args.number:
                 print( f"\rWords: { words_count }/{ args.number } | ETA: { int( eta )}s  ", end = "", flush = True )
                 break
