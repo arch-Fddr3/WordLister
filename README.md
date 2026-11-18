@@ -18,6 +18,8 @@ WordLister is a lightweight Python CLI tool for generating custom wordlists from
 
 - Output to `.txt` file
 
+- Output file size estimation
+
 - Configuration save option for better customization
 
 ## Requirements

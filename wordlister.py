@@ -10,12 +10,14 @@ from itertools import product
 update_time = 1.0
 eta = 0
 eta_config = True
+size_warning = True
 
 
 class SpacedHelpFormatter( argparse.HelpFormatter ):
     def _format_action( self, action ):
         text = super()._format_action( action )
         return text + "\n\n"
+
 
 def banner():
     print( r'''
@@ -38,18 +40,73 @@ def banner():
     
     
     
-    v2.0.1
+    v2.1.0
     
     
     
     ''' )
 
+
+def output_size( args ):
+    global size_warning
+    output_file_size = "over 500 GB"
+    input_words = args.input.encode( "utf-8" )
+    input_bytes = len( input_words )
+
+    if size_warning == True:
+        if input_bytes <= 17.5:
+            if args.number <= 10000000:
+                output_file_size = "can reach up to 500 MB"
+            elif args.number <= 500000000:
+                output_file_size = "can reach up to 25 GB"
+            elif args.number <= 1000000000:
+                output_file_size = "can reach up to 50 GB"
+            elif args.number <= 5000000000:
+                output_file_size = "can reach up to 250 GB"
+            elif args.number <= 10000000000:
+                output_file_size = "can reach up to 500 GB"
+            else:
+                pass
+        else:
+            if args.number <= 10000000:
+                output_file_size = "can reach up to 1 GB"
+            elif args.number <= 500000000:
+                output_file_size = "can reach up to 50 GB"
+            elif args.number <= 1000000000:
+                output_file_size = "can reach up to 100 GB"
+            elif args.number <= 5000000000:
+                output_file_size = "can reach up to 500 GB"
+            elif args.number <= 10000000000:
+                output_file_size = "can reach up to 1 TB"
+            else:
+                pass 
+        print( f"The output file size { output_file_size }. Do you wish to continue? [y/n]" )
+        print()
+        auth = input().strip().lower()
+        print()
+    
+        while True:
+            if auth == "y":
+                break
+            elif auth == "n":
+                sys.exit()
+            else:
+                print()
+                print( "Input is not valid enter exclusively [y/n]" )
+                print()
+                auth = input().strip().lower()
+                print()
+        pass
+  
+  
 def config_loader():
     global eta_config
     global update_time
+    global size_warning
     default_data = {
                 "eta_config": True,
-                "update_time": 1.0 
+                "update_time": 1.0, 
+                "size_warning": True
     }
     
     if os.path.exists( "config.json" ):
@@ -57,6 +114,7 @@ def config_loader():
             config = json.load( c )
             eta_config = config[ "eta_config" ]
             update_time = config[ "update_time" ]
+            size_warning = config[ "size_warning" ]
     else:
         with open( "config.json", "x", encoding = "utf-8" ) as c:
             json.dump( default_data, c, indent = 4 )
@@ -70,6 +128,7 @@ def config_save():
     
     config[ "eta_config" ] = eta_config
     config[ "update_time" ] = update_time
+    config[ "size_warning" ] = size_warning
     
     with open( "config.json", "w", encoding = "utf-8" ) as s:
         json.dump( config, s, indent = 4 )
@@ -90,16 +149,16 @@ def generator( words ):
     length = 1
     
     while True:
-        for combo in product( words, repeat=length ):
+        for combo in product( words, repeat = length ):
             word = "".join( combo )
             yield word
         length += 1
     
 if __name__ == "__main__":
-    parser=argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(
         prog = "WordLister",
         description = "A program to create any wordlist from a range of letter to .txt",
-        epilog = r"""Example: python3 wordlister.py -i "Lucas 1990 ! @ #" -n 10000 -o Lucas.txt -v -m""",
+        epilog = r"""Example: python3 wordlister.py -i "Lucas 1990 ! @ #" -n 10000 -o Lucas.txt -m""",
         formatter_class = SpacedHelpFormatter
     ) 
     parser.add_argument(
@@ -145,6 +204,15 @@ if __name__ == "__main__":
         "--eta-update", type = float,
         default = 1.0, help = "select how much time pass between ETA updates"
     )
+    size_group = extra_options_group.add_mutually_exclusive_group()
+    size_group.add_argument(
+        "--size-warning", action = "store_true",
+        default = True, help = "enable size warning authorisation"
+    )
+    size_group.add_argument(
+        "--no-size-warning", action = "store_false",
+        default = True, help = "disable size warning authorisation"
+    )
     extra_options_group.add_argument(
         "--save-config", action = "store_true",
         default = False, help = "save as active configuration"
@@ -159,7 +227,7 @@ if __name__ == "__main__":
     banner()
     
     config_loader()
-    
+
     if "--eta" in sys.argv:
         eta_config = True
     elif "--no-eta" in sys.argv:
@@ -168,10 +236,17 @@ if __name__ == "__main__":
     if eta_config and "--eta-update" in sys.argv:
         if args.eta_update != update_time:
             update_time = args.eta_update
+
+    if "--size-warning" in sys.argv:
+        size_warning = True
+    elif "--no-size-warning" in sys.argv:
+        size_warning = False
     
     if args.save_config:
         config_save()
-   
+
+    output_size( args )
+
     words = words_loader( args.input )
     words_count = 0
     start_time = time.time()
